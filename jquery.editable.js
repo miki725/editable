@@ -246,11 +246,15 @@
                     $original.trigger('replace.editable', args);
                 };
 
-                var error = function () {
+                var error = function (err) {
                     var args = Array.prototype.slice.call(arguments);
                     args.splice(0, 1);
                     $original.trigger('errorful.editable');
-                    settings.validate_error.apply($original, args);
+                    if (typeof(settings.validate_error) === 'function') {
+                        settings.validate_error.apply($original, args);
+                    } else {
+                        console.error('Error validating: ' + err);
+                    }
                 };
 
                 var call_event_process_event = function () {
