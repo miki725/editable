@@ -142,15 +142,19 @@
                     // generate the edit html using widget and replace it with the original value
                     // -------------------------------------------------------------------------------------------------
                     widget = new widget_class(widget_options);
-                    var edit_html = widget.render(original_val, original_properties);
+                    var widget_val = original_val;
+                    if (typeof(settings.widget_value) === 'function') {
+                        widget_val = settings.widget_value(widget_val);
+                    }
+                    var edit_html = widget.render(widget_val, original_properties);
                     $original.html(edit_html);
                     widget.focus();
 
 
                     // define what should happen
                     // -------------------------------------------------------------------------------------------------
-                    widget.blur(function () {
-                        $original.trigger('blur.editable');
+                    widget.blur(function (e, force) {
+                        $original.trigger('blur.editable', [force || false]);
                     });
                     widget.commit(function () {
                         $original.trigger('commit.editable');
@@ -158,8 +162,15 @@
 
                 };
 
-                var change = function (val) {
+                var replace = function (e, val) {
+                    // cleanup
+                    unbind_edit_events();
+                    widget.destroy();
+
                     val = !val ? settings.null_val : val;
+                    if (typeof(settings.invert_value) === 'function') {
+                        val = settings.invert_value(val);
+                    }
                     $original.html(val);
 
                     if (settings.parent_width === 'fixed') {
@@ -169,15 +180,15 @@
                         $original.parent().css('height', '');
                     }
 
-                    // cleanup
-                    unbind_edit_events();
-                    widget.destroy();
                     bind_trigger_events();
+
+                    $original.trigger('replaced.editable', [val, original_val]);
                 };
 
-                var blur = function (e) {
-                    // force blur if escape is pressed
-                    if (e !== undefined && e.type === 'keydown' && e.keyCode === 27) {
+                var blur = function (e, force) {
+                    $original.trigger('blurred.editable', [force]);
+                    // force blur
+                    if (force) {
                         $original.trigger('revert.editable');
                         return;
                     }
@@ -194,11 +205,52 @@
                 };
 
                 var revert = function () {
-                    change(original_val);
+                    $original.trigger('replace.editable', [original_val]);
+                    $original.trigger('reverted.editable', [original_val]);
                 };
 
                 var commit = function () {
-                    change(widget.val());
+                    var commit_val = widget.commit_val(), val = widget.val(), processed;
+                    $original.trigger('committed.editable', [commit_val, val, original_val]);
+                    // process the value
+                    if (typeof(settings.process_commit) === 'function') {
+                        processed = settings.process_commit.call($original, commit_val, val, original_val);
+                    } else {
+                        processed = [val];
+                    }
+                    // call the validation
+                    $original.trigger('validate.editable', processed);
+                };
+
+                var validate = function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.splice(0, 1);
+                    $original.trigger('validating.editable');
+                    try {
+                        if (typeof(settings.validate_value) === 'function') {
+                            args = settings.validate_value.apply($original, args);
+                        }
+                        $original.trigger('success.editable', args)
+                    } catch (err) {
+                        $original.trigger('error.editable', [err]);
+                    }
+                };
+
+                var success = function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.splice(0, 1);
+                    $original.trigger('successful.editable');
+                    if (typeof(settings.validate_success) === 'function') {
+                        args = settings.validate_success.apply($original, args);
+                    }
+                    $original.trigger('replace.editable', args);
+                };
+
+                var error = function () {
+                    var args = Array.prototype.slice.call(arguments);
+                    args.splice(0, 1);
+                    $original.trigger('errorful.editable');
+                    settings.validate_error.apply($original, args);
                 };
 
                 var call_event_process_event = function () {
@@ -211,42 +263,54 @@
                     bind_edit_events();
                 };
 
-                /*
-                 Bind events to the original dom element which can trigger the editing process,
-                 or anything to do with triggering the edit process. This does not bind any
-                 events which occur during the editing process such as blur or commit.
+                /**
+                 * Bind events to the original dom element which can trigger the editing process,
+                 * or anything to do with triggering the edit process. This does not bind any
+                 * events which occur during the editing process such as blur or commit.
                  */
                 var bind_trigger_events = function () {
                     $original.bind(settings.event, call_event_process_event);
                     $original.bind('edit.editable', call_event_process_api)
                 };
 
-                /*
-                 Unbind all the events from the original dom element which trigger the editing process.
-                 The reason why that is necessary is because when the editing process is started lets say
-                 due to a click, then if the user clicks again on the element, it can cause unwanted
-                 side-effects, so to avoid them, events are unbinded from the element. This is also better
-                 compared to having an editing flag because if the event is not fired at all, it is faster
-                 compared to the event being fired and then checking if it should do anything.
+                /**
+                 * Unbind all the events from the original dom element which trigger the editing process.
+                 * The reason why that is necessary is because when the editing process is started lets say
+                 * due to a click, then if the user clicks again on the element, it can cause unwanted
+                 * side-effects, so to avoid them, events are unbinded from the element. This is also better
+                 * compared to having an editing flag because if the event is not fired at all, it is faster
+                 * compared to the event being fired and then checking if it should do anything.
                  */
                 var unbind_trigger_events = function () {
                     $original.unbind(settings.event, call_event_process_event);
                     $original.unbind('edit.editable', call_event_process_api);
                 };
 
-                /*
-                 Bind all the events which can happen during the editing such as revert and commit
+                /**
+                 * Bind all the events which can happen during the editing such as revert and commit
                  */
                 var bind_edit_events = function () {
                     $original.bind('blur.editable', blur);
                     $original.bind('revert.editable', revert);
                     $original.bind('commit.editable', commit);
+                    $original.bind('validate.editable', validate);
+                    $original.bind('error.editable', error);
+                    $original.bind('success.editable', success);
+                    $original.bind('replace.editable', replace);
                 };
 
+                /**
+                 * Unbind all the events which can happen during the editing such as revert and commit
+                 * in order to avoid undesired effects when the same element is edited more then once.
+                 */
                 var unbind_edit_events = function () {
                     $original.unbind('blur.editable', blur);
                     $original.unbind('revert.editable', revert);
                     $original.unbind('commit.editable', commit);
+                    $original.unbind('validate.editable', validate);
+                    $original.unbind('error.editable', error);
+                    $original.unbind('success.editable', success);
+                    $original.unbind('replace.editable', replace);
                 };
 
             }
@@ -259,17 +323,24 @@
 
     $.editable = {
         defaults: {
-            event         : 'dblclick',
-            on_blur       : 'cancel',
-            auto_widget   : true,
-            widget        : 'text',
-            widget_options: {
+            event           : 'dblclick',
+            on_blur         : 'cancel',
+            auto_widget     : true,
+            widget          : 'text',
+            widget_options  : {
                 width : 'auto',
                 height: 'auto'
             },
-            null_val      : 'none',
-            parent_width  : 'fixed',
-            parent_height : 'fixed'
+            null_val        : 'none',
+            parent_width    : 'fixed',
+            parent_height   : 'fixed',
+            // hooks
+            widget_value    : null,
+            invert_value    : null,
+            process_commit  : null,
+            validate_value  : null,
+            validate_success: null,
+            validate_error  : null
         },
         widgets : {
             defaults: {
@@ -290,7 +361,7 @@
                 this.rendered_html.unbind();
             },
 
-            settings: {},
+            settings: null,
 
             render: function (el, properties) {
                 // adjust the width and height
@@ -320,11 +391,11 @@
                     return;
                 }
                 $(this.rendered_html).blur(function (e) {
-                    f(e);
+                    f(e, false);
                 });
                 $(this.rendered_html).keydown(function (e) {
                     if (e.keyCode === 27) {
-                        f(e);
+                        f(e, true);
                     }
                 });
             },
@@ -397,6 +468,15 @@
                                 }
                             }
                         }
+                    },
+
+                    commit: function (f) {
+                        this.Super(f);
+                        $(this.rendered_html).bind('change', $.proxy(function (e) {
+                            if (typeof(f) === 'function') {
+                                f(this);
+                            }
+                        }, this));
                     }
                 },
                 {
