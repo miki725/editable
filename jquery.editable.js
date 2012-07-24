@@ -352,6 +352,36 @@
             defaults: {
                 classes: 'editable_input'
             }
+        },
+        helpers : {
+            get_caret_position: function (el) {
+                // from http://flightschool.acylt.com/devnotes/caret-position-woes/
+
+                // Initialize
+                var iCaretPos = 0;
+
+                // IE Support
+                if (document.selection) {
+
+                    // Set focus on the element
+                    el.focus();
+
+                    // To get cursor position, get empty selection range
+                    var oSel = document.selection.createRange();
+
+                    // Move selection start to 0 position
+                    oSel.moveStart('character', -el.value.length);
+
+                    // The caret position is selection length
+                    iCaretPos = oSel.text.length;
+                }
+
+                // Firefox support
+                else if (el.selectionStart || el.selectionStart == '0')
+                    iCaretPos = el.selectionStart;
+
+                return iCaretPos;
+            }
         }
     };
 
@@ -444,6 +474,8 @@
 
             textarea: base.extend(
                 {
+                    cursor_position: 0,
+
                     render: function (value, properties) {
                         value = value.replace(/<br>/g, '\n');
                         var el = $('<textarea></textarea>').html(value).attr(
@@ -457,7 +489,8 @@
 
                     commit_val: function () {
                         var commit_val = this.Super();
-                        return commit_val.substring(0, commit_val.length - 1);
+                        return commit_val.substring(0, this.cursor_position - 1) +
+                            commit_val.substring(this.cursor_position);
                     },
 
                     val: function () {
@@ -474,14 +507,17 @@
                             // unbind the function to avoid second clicks
                             this.rendered_html.unbind('keydown', g);
 
-                            var h = function (e) {
+                            var h = $.proxy(function (e) {
                                 if (e.keyCode === 13) {
                                     e.preventDefault();
+
+                                    this.cursor_position = $.editable.helpers.get_caret_position(this.rendered_html[0]);
+
                                     if (typeof(f) === 'function') {
                                         f(this);
                                     }
                                 }
-                            };
+                            }, this);
 
                             this.rendered_html.bind('keydown', h);
 
