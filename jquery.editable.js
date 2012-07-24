@@ -67,7 +67,7 @@
                             // widget type is provided
                             // make sure it is supported
                             if (!widgets.hasOwnProperty(widget)) {
-                                throw 'Not supported widget \'' + settings.widget + '\'';
+                                throw 'Not supported widget \'' + widget + '\'';
                             }
                             widget_class = widgets[widget];
                             // get the options for the widget
@@ -210,16 +210,15 @@
                 };
 
                 var commit = function () {
-                    var commit_val = widget.commit_val(), val = widget.val(), processed;
+                    var commit_val = widget.commit_val(), val = widget.val();
                     $original.trigger('committed.editable', [commit_val, val, original_val]);
                     // process the value
                     if (typeof(settings.process_commit) === 'function') {
-                        processed = settings.process_commit.call($original, commit_val, val, original_val);
+                        settings.process_commit.call($original, commit_val, val, original_val);
                     } else {
-                        processed = [val];
+                        // call the validation
+                        $original.trigger('validate.editable', [val]);
                     }
-                    // call the validation
-                    $original.trigger('validate.editable', processed);
                 };
 
                 var validate = function () {
@@ -246,14 +245,15 @@
                     $original.trigger('replace.editable', args);
                 };
 
-                var error = function (err) {
+                var error = function (e, err) {
                     var args = Array.prototype.slice.call(arguments);
                     args.splice(0, 1);
                     $original.trigger('errorful.editable');
                     if (typeof(settings.validate_error) === 'function') {
                         settings.validate_error.apply($original, args);
                     } else {
-                        console.error('Error validating: ' + err);
+                        console.error('Error validating:');
+                        console.log(err);
                     }
                 };
 
@@ -357,7 +357,7 @@
     var base = $.editable.widgets.base = $.Class.extend(
         {
             init: function (options) {
-                this.settings = $.extend({}, this.settings, $.editable.widgets.defaults, options);
+                this.settings = $.extend({}, $.editable.widgets.defaults, this.settings, options);
                 this.rendered_html = '';
             },
 
@@ -428,8 +428,7 @@
         {
             text  : base.extend(
                 {
-                    template: '<div><input type="text" class="{{classes}}" value="{{value}}"></div>',
-                    render  : function (value, properties) {
+                    render: function (value, properties) {
                         var el = $('<input>').attr(
                             {
                                 'class': this.settings.classes,
