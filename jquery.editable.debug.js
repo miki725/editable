@@ -18,6 +18,7 @@
 
         var NAMESPACE = 'editable',
             EVENTS = [
+                'preedit',
                 'edit',
                 'blur',
                 'blurred',

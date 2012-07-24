@@ -128,6 +128,8 @@
                         height: $original.height()
                     };
 
+                    $original.trigger('preedit.editable');
+
 
                     // modify the parent if necessary
                     // -------------------------------------------------------------------------------------------------
