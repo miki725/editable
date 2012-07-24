@@ -428,7 +428,7 @@
     $.extend(
         $.editable.widgets,
         {
-            text  : base.extend(
+            text: base.extend(
                 {
                     render: function (value, properties) {
                         var el = $('<input>').attr(
@@ -441,6 +441,61 @@
                     }
                 }
             ),
+
+            textarea: base.extend(
+                {
+                    render: function (value, properties) {
+                        value = value.replace(/<br>/g, '\n');
+                        var el = $('<textarea></textarea>').html(value).attr(
+                            {
+                                'class': this.settings.classes
+                            }
+                        );
+                        el.TextAreaExpander();
+                        return this.Super(el, properties);
+                    },
+
+                    commit_val: function () {
+                        var commit_val = this.Super();
+                        return commit_val.substring(0, commit_val.length - 1);
+                    },
+
+                    val: function () {
+                        return this.Super().replace(/\n/g, '<br>');
+                    },
+
+                    commit: function (f) {
+                        var g = $.proxy(function (e) {
+
+                            if (e.keyCode !== 13) {
+                                return;
+                            }
+
+                            // unbind the function to avoid second clicks
+                            this.rendered_html.unbind('keydown', g);
+
+                            var h = function (e) {
+                                if (e.keyCode === 13) {
+                                    e.preventDefault();
+                                    if (typeof(f) === 'function') {
+                                        f(this);
+                                    }
+                                }
+                            };
+
+                            this.rendered_html.bind('keydown', h);
+
+                            var t = setTimeout($.proxy(function (e) {
+                                this.rendered_html.unbind('keydown', h);
+                                this.rendered_html.bind('keydown', g);
+                            }, this), 300);
+
+                        }, this);
+                        this.rendered_html.bind('keydown', g);
+                    }
+                }
+            ),
+
             select: base.extend(
                 {
                     render: function (value, properties) {
