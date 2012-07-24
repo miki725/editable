@@ -62,6 +62,14 @@
                         var widget = $original.attr('data-widget'),
                             options = $original.attr('data-widget-options');
 
+                        if (options !== undefined && options) {
+                            // get the options for the widget
+                            // get the options from the element attribute if exists
+                            if (options !== undefined) {
+                                $.extend(widget_options, JSON.parse(options));
+                            }
+                        }
+
                         // if the attribute exists and it has a value
                         if (widget !== undefined && widget) {
                             // widget type is provided
@@ -70,17 +78,7 @@
                                 throw 'Not supported widget \'' + widget + '\'';
                             }
                             widget_class = widgets[widget];
-                            // get the options for the widget
-                            // get the options from the element attribute if exists
-                            if (options !== undefined) {
-                                $.extend(widget_options, JSON.parse(options));
-                            }
-                            // get the options specific to each widget
-                            // make the function exists
-                            var el_options = widget_class.hasOwnProperty('get_el_options') &&
-                                typeof(widget_class.get_el_options) === 'function' ?
-                                widget_class.get_el_options($original) : {};
-                            $.extend(widget_options, el_options);
+
                             return true;
                         }
                     }
@@ -108,6 +106,13 @@
                 } else {
                     throw 'Not supported widget type \'' + typeof(settings.widget) + '\'';
                 }
+
+                // get the options specific to each widget
+                // make the function exists
+                var el_options = widget_class.hasOwnProperty('get_el_options') &&
+                    typeof(widget_class.get_el_options) === 'function' ?
+                    widget_class.get_el_options($original) : {};
+                $.extend(widget_options, el_options);
 
             }
 
@@ -335,7 +340,8 @@
             widget          : 'text',
             widget_options  : {
                 width : 'auto',
-                height: 'auto'
+                height: 'auto',
+                inline: false
             },
             null_val        : 'none',
             parent_width    : 'fixed',
@@ -411,7 +417,12 @@
                        });
 
                 this.rendered_html = el;
-                return $('<div></div>').append(this.rendered_html);
+                var div = $('<div></div>').append(this.rendered_html);
+                if ([true, 'true'].indexOf(this.settings.inline) !== -1) {
+                    div.css({display: 'inline'});
+                }
+
+                return div
             },
 
             val: function () {
