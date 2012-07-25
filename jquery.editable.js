@@ -272,6 +272,11 @@
                     unbind_trigger_events();
                     event_process(e);
                     bind_edit_events();
+
+                    // if instant_commit, then commit immediately
+                    if (widget_class.hasOwnProperty('instant_commit') && widget_class.instant_commit === true) {
+                        widget.commit();
+                    }
                 };
 
                 /**
@@ -466,6 +471,58 @@
         }
     );
 
+    var toggle = $.editable.widgets.toggle = base.extend(
+        {
+            render: function (value, properties) {
+                this.rendered_html = $(value);
+                $.extend(this.settings, properties);
+            },
+
+            commit: function (f) {
+                if (f !== undefined) {
+                    if (typeof f === 'function') {
+                        this.commit_callback = f;
+                    }
+                } else {
+                    if (this.commit_callback) {
+                        var is_on = this.is_on();
+                        if (is_on === true) {
+                            this.toggle_off();
+                        } else {
+                            this.toggle_on();
+                        }
+                        $.proxy(this.commit_callback(this), this);
+                    }
+                }
+            },
+
+            commit_val: function () {
+                console.log('commit_val');
+                return this.is_on() ? 'on' : '';
+            },
+
+            val       : function () {
+                console.log('val');
+                return this.rendered_html;
+            },
+
+            // for toggling, these methods should not do anything
+            blur      : function (f) {
+            },
+            focus     : function () {
+            },
+
+            // placeholders
+            is_on     : null,
+            toggle_on : null,
+            toggle_off: null
+
+        },
+        {
+            instant_commit: true
+        }
+    );
+
     $.extend(
         $.editable.widgets,
         {
@@ -595,6 +652,29 @@
                         }
                         return options;
                     }
+                }
+            ),
+
+            'icon-toggle': toggle.extend(
+                {
+                    is_on: function () {
+                        return this.rendered_html.hasClass(this.settings.on_class);
+                    },
+
+                    toggle_on: function () {
+                        this.rendered_html
+                            .addClass(this.settings.on_class)
+                            .removeClass(this.settings.off_class);
+                    },
+
+                    toggle_off: function () {
+                        this.rendered_html
+                            .addClass(this.settings.off_class)
+                            .removeClass(this.settings.on_class);
+                    }
+                },
+                {
+                    instant_commit: true
                 }
             )
         }
