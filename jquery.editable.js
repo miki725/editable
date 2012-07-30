@@ -193,16 +193,19 @@
                 };
 
                 var blur = function (e, force) {
-                    $original.trigger('blurred.editable', [force]);
+
                     // force blur
                     if (force) {
+                        $original.trigger('blurred.editable', [force]);
                         $original.trigger('revert.editable');
                         return;
                     }
                     // else follow the on_blur rules
                     if (settings.on_blur === 'cancel') {
+                        $original.trigger('blurred.editable', [force]);
                         $original.trigger('revert.editable');
                     } else if (settings.on_blur === 'commit') {
+                        $original.trigger('blurred.editable', [force]);
                         $original.trigger('commit.editable');
                     } else if (settings.on_blur === 'none') {
 
@@ -231,7 +234,7 @@
                 var validate = function () {
                     var args = Array.prototype.slice.call(arguments);
                     args.splice(0, 1);
-                    $original.trigger('validating.editable');
+                    $original.trigger('validating.editable', args);
                     try {
                         if (typeof(settings.validate_value) === 'function') {
                             args = settings.validate_value.apply($original, args);
