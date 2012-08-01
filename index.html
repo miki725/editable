@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Editable by miki725</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Editable</h1>
+          <h2>In place editing made easy</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/miki725/editable/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/miki725/editable/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/miki725/editable" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Editable</h1>
+
+<p>This is a simple event-driven jQuery in-place editing plugin. It allows to easily add in-place
+editing to your pages with no extra markup necessary. Here is an example of how to use it:</p>
+
+<pre><code>// script
+$('.edit').editable();
+
+// html
+&lt;div class="edit"&gt;Some text to edit&lt;/div&gt;
+</code></pre>
+
+<h2>About</h2>
+
+<p>What makes this library different from many of other in-place plugins such as
+<a href="http://www.appelsiini.net/projects/jeditable"><em>jeditable</em></a>, which is an excellent plugin and from which
+this plugin is based on, is that this plugin is event driven as much as possible.
+This allows for the plugin to be extremely dynamic and expandable, which in turn allows for things like that:</p>
+
+<pre><code>var edit = $('.edit').editable(...);
+
+// some time later
+edit.bind('committed.editable', function(commit_val, val, original_val) {
+    alert('Hey. Congrats! You just changed ' + original_val + ' to ' + val);
+}
+</code></pre>
+
+<p>without passing a million callback functions to the constructor function. Please read below
+for the full list of available events and their parameters.</p>
+
+<h2>Requirements</h2>
+
+<p>This library is dependent on a couple of other jQuery plugins.</p>
+
+<ul>
+<li>
+<p><a href="https://github.com/miki725/jquery-class"><code>jQuery.Class</code></a></p>
+
+<p>Widgets in this plugin are class based in order to enable inheritance, hence allowing to create
+new widget types with ease. <strong>Note</strong> Use this specific fork and not the original since I have changed
+it a bit so the original will break on you. If you are already using this plugin, you can replace
+it with my fork. It is a superset of the original repo, so nothing should break. I just added an option
+to be able to extend static properties.</p>
+</li>
+</ul><h2>Options</h2>
+
+<p>Here are the supported options which can be passed to the plugin such as:</p>
+
+<pre><code>$('.edit').editable({
+   key: value,
+   ...
+})
+</code></pre>
+
+<h3><code>event</code></h3>
+
+<p>{<em>str</em>}</p>
+
+<p>Any jQuery supported event which will be used to trigger the editing. The default is <em>dblclick</em>.</p>
+
+<h3><code>on_blur</code></h3>
+
+<p>{<em>str</em>} [<em>cancel</em>, <em>submit</em> or <em>none</em>]</p>
+
+<p>Specifies what should happen when the user blurs from the edit element. Please note that each widget
+  when triggering a blur mechanism can pass a <em>force</em> parameter which if true, this options is ignored
+  and blur is forced. Default is <em>cancel</em>.</p>
+
+<h3><code>auto_widget</code></h3>
+
+<p>{<em>bool</em>}</p>
+
+<p>If true, the widget type will be tried to be looked up from the element's <em>data-widget</em> attribute.
+  Otherwise it will use the given widget type in the options, or the default if one is not given.
+  Default is <em>true</em>.</p>
+
+<h3><code>widget</code></h3>
+
+<p>{<em>str</em>}</p>
+
+<p>The widget type to be used for the edit. Default is <em>text</em>.</p>
+
+<h3><code>widget_options</code></h3>
+
+<p>{<em>object</em>}</p>
+
+<p>An object which will be passed to the widget when it is initialized. If you make a custom widget, you
+  can pass anything here. The default options are:</p>
+
+<ul>
+<li>
+<p><code>width</code> {<em>str</em>, <em>int</em>}</p>
+
+<p>The width of editable element. If '<em>auto</em>', the width of the element will match the width of the
+original edit element. Default is <em>auto</em>.</p>
+</li>
+<li>
+<p><code>height</code> {<em>str</em>, <em>int</em>}</p>
+
+<p>The height of editable element. If '<em>auto</em>', the height of the element will match the height of the
+original edit element. Default is <em>auto</em>.</p>
+</li>
+<li>
+<p><code>inline</code> {<em>bool</em>}</p>
+
+<p>If the editable element should be inline. Default is <em>false</em>.</p>
+</li>
+</ul><h3><code>null_val</code></h3>
+
+<p>{<em>str</em>}</p>
+
+<p>The null value of the widget. Sometimes when the value is null, something else is displayed to the
+  user instead of an empty string, so this options is used in order to figure which value to ignore
+  when the edit is initialized and which value to display if user changed the value to an empty string.
+  Default is <em>none</em>.</p>
+
+<h3><code>parent_width</code></h3>
+
+<p>{<em>str</em>}</p>
+
+<p>The width of the parent element during the edit. If the edit field is inside of fluid table,
+  even if the <em>widget_options.widht</em> is <em>true</em>, just by introducing a dom element to the table,
+  it can cause the table sizes to shift which is not necessarily pleasing. This options if set
+  to <em>fixed</em> then while the edit is happening, it will set the width of the parent element
+  to a fixed number fixing the issue. Default is <em>fixed</em>.</p>
+
+<h3><code>parent_height</code></h3>
+
+<p>{<em>str</em>}</p>
+
+<p>Same as for <em>parent_width</em> but for height.</p>
+
+<h3><code>widget_value</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>Sometimes creating a new widget might be an overkill for some basic preprocessing. This hook
+  if given, should take a value and return a processed value. it will be called before calling
+  the widget's <em>render</em> method. Some possible usage is to convert original value to lower case.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} The original value to be edited</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h3><code>invert_value</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>This is an inverse of the <em>widget_value</em> hook. It will be called before changing the replacing
+  the edit element value.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} The edited value</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h3><code>process_commit</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>This hook is mainly made when the value has to be submitted to the server. After this function
+  processes the value (gets the response from the server), it's job is to trigger the validation
+  of the value. Since it is called with the context of the original edit element, <em>this</em> can be
+  used:</p>
+
+<pre><code>  function process_commit(commit_val, val, original_val) {
+      this.trigger('validate.editable', [...]);
+  }
+</code></pre>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>commit_val</code> {<em>str</em>} The commit value as returned by the widget</li>
+<li>
+<code>val</code> {<em>str</em>} The visible value as returned by the widget</li>
+<li>
+<code>original_val</code> {<em>str</em>} The original value of the element</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h3><code>validate_value</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>The job of this function is to validate the processed value in the commit cycle. All arguments passed to
+  the <em>validate.editable</em> event are going to be passed to this function. If the value is invalid,
+  it should throw an error. If valid, it should just return the valid value which is going to be
+  passed to the <em>validate_success</em> hook if given.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} The value to be validated</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h3><code>validate_error</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>Normally if validation fails, the commit cycle is cancelled and the value is not committed
+  (the edit widget (e.g. textbox) still appears allowing the user to correct the mistake).
+  However if for some reason, after the invalid input, the value still has to be committed on the screen
+  (the server already failed), this function can be used to do that. In that case it should trigger
+  <em>replace.editable</em> event.</p>
+
+<p><strong>Note</strong> do not use this hook in order to display error messages to the user. For that, you can bing
+  to the <em>errorful.editable</em> event. This hook is allowed for changing the default behaviour of the plugin.
+  For everything else, events should be used.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>err</code> {<em>str</em>} The error which was raised during validation</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h3><code>validate_success</code></h3>
+
+<p>{<em>function</em>}</p>
+
+<p>If the validation is successful, normally the returned value from <em>validate_value</em> is going to be used
+  (after passing it through <em>invert_value</em>) in order to replace the value, however if any other
+  additional processing has to be applied to the value, this function is for that. It should take
+  a value and returned a processed value which will be used in order to replace the original element.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} The value which was successfully validated</li>
+<li>
+<code>settings</code> {<em>object</em>} The editable settings. This is mainly oriented for extending Editable.</li>
+</ul><h2>Events</h2>
+
+<h3><code>preedit.editable</code></h3>
+
+<p>Triggered before the body of the <em>edit.editable</em> is executed therefore therefore allowing to apply
+  any actions necessary before the widget is going to be rendered.</p>
+
+<h3><code>edit.editable</code></h3>
+
+<p>Triggered whenever the edit trigger action occurs. That can either be a user action (e.g. <em>dblclick</em>) or
+  function call in JavaScript (e.g. <em>$(el).trigger('edit.editable')</em>).</p>
+
+<h3><code>blur.editable</code></h3>
+
+<p>When a user blurs away from the edit widget. Please note that each widget provides it's own
+  callback for blur event since blur can be triggered with different actions in different widgets.</p>
+
+<p><strong>Parameters</strong>:</p>
+
+<ul>
+<li>
+<em>force</em> {<em>bool</em>} If the blur has to be forced (e.g. Esc was pressed)</li>
+</ul><h3><code>blurred.editable</code></h3>
+
+<p><em>blur.editable</em> just starts the blur process but does not guarantee that the blur will happen
+  for whatever reason (e.g. <em>on_blur == 'none'</em>). This event is triggered only when the blur
+  actually happens.</p>
+
+<p><strong>Parameters</strong>:</p>
+
+<ul>
+<li>
+<em>force</em> {<em>bool</em>} If the blur was forced</li>
+</ul><h3><code>revert.editable</code></h3>
+
+<p>Start the revert process where the value is changed back to its original state. All changes
+  are discarded.</p>
+
+<h3><code>reverted.editable</code></h3>
+
+<p>When the revert is complete.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<em>original_val</em> {<em>str</em>} The original html value of the editable element to which the revert changed</li>
+</ul><h3><code>commit.editable</code></h3>
+
+<p>When the editable value was committed by the widget or via a function call (<em>$(el).trigger('commit.editable')</em>).</p>
+
+<h3><code>committed.editable</code></h3>
+
+<p>The <em>commit</em> triggers the commit of the value whereas this event is to let the listener know that
+  commit happened.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<em>commit_val</em> {<em>str</em>} The value to be committed to a program interface returned by a widget. Good example
+is the value of the <em>option</em> returned in the <em>select</em> tag.</li>
+<li>
+<em>val</em> {<em>str</em>} The value to be displayed back to the user if validation is successful.</li>
+<li>
+<em>original_val</em> {<em>str</em>} The original value of the editable element.</li>
+</ul><h3><code>validate.editable</code></h3>
+
+<p>Is triggered after the value is processed.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value to validate.</li>
+</ul><h3><code>validating.editable</code></h3>
+
+<p><em>validate.editable</em> triggers an action whereas this event is just a consumer of data.
+  It is passed also passed the value which has to be validated.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value which is being validated - the only passed from <em>process_commit</em>
+</li>
+</ul><h3><code>success.editable</code></h3>
+
+<p>Used to trigger the processing of successfully validated value</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value to be processed which was previously successfully validated</li>
+</ul><h3><code>successful.editable</code></h3>
+
+<p>Event which is triggered when the validation was successful and is passed the value which was validated</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value successfully validated</li>
+</ul><h3><code>error.editable</code></h3>
+
+<p>Used to trigger the processing of not successfully validated value</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value to be processed which was previously not successfully validated</li>
+</ul><h3><code>errorful.editable</code></h3>
+
+<p>Event which is triggered when the validation was not successful and is passed the value which was validated</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} the value not successfully validated</li>
+</ul><h3><code>replace.editable</code></h3>
+
+<p>Used to replace the widget, where the original element is with some other value. Please note that
+  whatever value is passed into this event is going to go through <code>invert_value</code> before actually changing
+  the value.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>val</code> {<em>str</em>} The value to which change the edit element</li>
+</ul><h3><code>replaced.editable</code></h3>
+
+<p>When the replace is complete.</p>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>
+<code>to</code> {<em>str</em>} To which the value was changed to</li>
+<li>
+<code>from</code> {<em>str</em>} The original value of the edit element</li>
+</ul>
+        </section>
+
+        <footer>
+          Editable is maintained by <a href="https://github.com/miki725">miki725</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+                  <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-18213830-6");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+      </div>
+    </div>
+  </body>
+</html>
