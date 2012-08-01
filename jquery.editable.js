@@ -52,7 +52,7 @@
             // ---------------------------------------------------------------------------------------------------------
             {
                 var widget_class = null,
-                    widget_options = settings.widget_options,
+                    widget_options = $.extend({}, settings.widget_options),
                     widgets = $.editable.widgets,
                     widget; // replaced each time the event is triggered
 
@@ -151,7 +151,7 @@
                     widget = new widget_class(widget_options);
                     var widget_val = original_val;
                     if (typeof(settings.widget_value) === 'function') {
-                        widget_val = settings.widget_value(widget_val);
+                        widget_val = settings.widget_value(widget_val, settings);
                     }
                     var edit_html = widget.render(widget_val, original_properties);
                     $original.html(edit_html);
@@ -176,7 +176,7 @@
 
                     val = !val ? settings.null_val : val;
                     if (typeof(settings.invert_value) === 'function') {
-                        val = settings.invert_value(val);
+                        val = settings.invert_value(val, settings);
                     }
                     $original.html(val);
 
@@ -224,7 +224,7 @@
                     $original.trigger('committed.editable', [commit_val, val, original_val]);
                     // process the value
                     if (typeof(settings.process_commit) === 'function') {
-                        settings.process_commit.call($original, commit_val, val, original_val);
+                        settings.process_commit.call($original, commit_val, val, original_val, settings);
                     } else {
                         // call the validation
                         $original.trigger('validate.editable', [val]);
@@ -237,6 +237,7 @@
                     $original.trigger('validating.editable', args);
                     try {
                         if (typeof(settings.validate_value) === 'function') {
+                            args.push(settings);
                             args = settings.validate_value.apply($original, args);
                         }
                         $original.trigger('success.editable', args)
@@ -250,6 +251,7 @@
                     args.splice(0, 1);
                     $original.trigger('successful.editable');
                     if (typeof(settings.validate_success) === 'function') {
+                        args.push(settings);
                         args = settings.validate_success.apply($original, args);
                     }
                     $original.trigger('replace.editable', args);
@@ -260,6 +262,7 @@
                     args.splice(0, 1);
                     $original.trigger('errorful.editable');
                     if (typeof(settings.validate_error) === 'function') {
+                        args.push(settings);
                         settings.validate_error.apply($original, args);
                     } else {
                         console.error('Error validating:');
@@ -554,7 +557,7 @@
                                 'class': this.settings.classes
                             }
                         );
-                        el.TextAreaExpander();
+                        el.autosize();
                         return this.Super(el, properties);
                     },
 

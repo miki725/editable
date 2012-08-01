@@ -140,12 +140,22 @@ $('.edit').editable({
   if given, should take a value and return a processed value. it will be called before calling
   the widget's *render* method. Some possible usage is to convert original value to lower case.
 
+  **Parameters**
+
+  * `val` {*str*} The original value to be edited
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
+
 ###`invert_value`###
 
   {*function*}
 
   This is an inverse of the *widget_value* hook. It will be called before changing the replacing
   the edit element value.
+
+  **Parameters**
+
+  * `val` {*str*} The edited value
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
 
 ###`process_commit`###
 
@@ -167,6 +177,7 @@ $('.edit').editable({
   * `commit_val` {*str*} The commit value as returned by the widget
   * `val` {*str*} The visible value as returned by the widget
   * `original_val` {*str*} The original value of the element
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
 
 ###`validate_value`###
 
@@ -176,6 +187,11 @@ $('.edit').editable({
   the *validate.editable* event are going to be passed to this function. If the value is invalid,
   it should throw an error. If valid, it should just return the valid value which is going to be
   passed to the *validate_success* hook if given.
+
+  **Parameters**
+
+  * `val` {*str*} The value to be validated
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
 
 ###`validate_error`###
 
@@ -191,6 +207,11 @@ $('.edit').editable({
   to the *errorful.editable* event. This hook is allowed for changing the default behaviour of the plugin.
   For everything else, events should be used.
 
+  **Parameters**
+
+  * `err` {*str*} The error which was raised during validation
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
+
 ###`validate_success`###
 
   {*function*}
@@ -200,6 +221,10 @@ $('.edit').editable({
   additional processing has to be applied to the value, this function is for that. It should take
   a value and returned a processed value which will be used in order to replace the original element.
 
+  **Parameters**
+
+  * `val` {*str*} The value which was successfully validated
+  * `settings` {*object*} The editable settings. This is mainly oriented for extending Editable.
 
 
 ##Events##
