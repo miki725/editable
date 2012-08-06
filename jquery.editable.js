@@ -616,7 +616,7 @@
                             if (choices.hasOwnProperty(key)) {
                                 option = choices[key];
                                 option_el = $('<option></option>').html(option).attr({value: key});
-                                if (value === option) {
+                                if (value === option || value === key) {
                                     option_el.attr({selected: 'selected'});
                                 }
                                 el.append(option_el);
