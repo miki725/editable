@@ -249,7 +249,7 @@
                 var success = function () {
                     var args = Array.prototype.slice.call(arguments);
                     args.splice(0, 1);
-                    $original.trigger('successful.editable');
+                    $original.trigger('successful.editable', args);
                     if (typeof(settings.validate_success) === 'function') {
                         args.push(settings);
                         args = settings.validate_success.apply($original, args);
@@ -260,7 +260,7 @@
                 var error = function (e, err) {
                     var args = Array.prototype.slice.call(arguments);
                     args.splice(0, 1);
-                    $original.trigger('errorful.editable');
+                    $original.trigger('errorful.editable', args);
                     if (typeof(settings.validate_error) === 'function') {
                         args.push(settings);
                         settings.validate_error.apply($original, args);
