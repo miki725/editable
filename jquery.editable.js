@@ -535,6 +535,7 @@
             text: base.extend(
                 {
                     render: function (value, properties) {
+                        value = Encoder.htmlDecode(value);
                         var el = $('<input>').attr(
                             {
                                 'class': this.settings.classes,
