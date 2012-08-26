@@ -1,4 +1,4 @@
-/*
+/*!
  * Editable - jQuery in place edit plugin
  *
  * This module is for debugging purposes. It reports whenever any of the editable
@@ -8,7 +8,6 @@
  *
  * Based on Jeditable:
  *    http://www.appelsiini.net/projects/jeditable
- *
  */
 
 

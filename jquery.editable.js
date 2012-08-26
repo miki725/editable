@@ -1,11 +1,10 @@
-/*
+/*!
  * Editable - jQuery in place edit plugin based on Jeditable
  *
  * Copyright (c) 2012 Miroslav Shubernetskiy
  *
  * Based on Jeditable:
  *    http://www.appelsiini.net/projects/jeditable
- *
  */
 
 (function ($) {

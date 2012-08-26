@@ -1,11 +1,10 @@
-/*
+/*!
  * Server extension for Editable - jQuery in place edit plugin
  *
  * Copyright (c) 2012 Miroslav Shubernetskiy
  *
  * Based on Jeditable:
  *    http://www.appelsiini.net/projects/jeditable
- *
  */
 
 
